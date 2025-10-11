@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <key>Label</key>
+    <string>com.miner.widget</string>
+    <key>ProgramArguments</key>
+    <array>
+        <string>/bin/bash</string>
+        <string>-c</string>
+        <string>cd /Users/Jan/PycharmProjects/Miner_stats && source .venv/bin/activate && python miner_widget.py</string>
+    </array>
+    <key>RunAtLoad</key>
+    <true/>
+    <key>KeepAlive</key>
+    <true/>
+    <key>StandardOutPath</key>
+    <string>/Users/Jan/PycharmProjects/Miner_stats/logs/miner_launch.log</string>
+    <key>StandardErrorPath</key>
+    <string>/Users/Jan/PycharmProjects/Miner_stats/logs/miner_launch_error.log</string>
+    <key>WorkingDirectory</key>
+    <string>/Users/Jan/PycharmProjects/Miner_stats</string>
+    <key>ProcessType</key>
+    <string>Background</string>
+</dict>
+</plist> 
