@@ -10,12 +10,7 @@ pip install -r requirements.txt
 
 ## Konfigurace
 
-1. Zkopírujte `.env.example` na `.env`:
-```bash
-cp .env.example .env
-```
-
-2. Upravte `.env` soubor s vašimi skutečnými credentials:
+Vytvořte `.env` soubor s vašimi credentials:
 
 ## Použití
 
