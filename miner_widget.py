@@ -20,7 +20,6 @@ import time
 import logging
 import socket
 import subprocess
-import urllib3
 from logging.handlers import RotatingFileHandler
 from dotenv import load_dotenv
 
@@ -103,9 +102,6 @@ class Logger:
 
 # Inicializace loggeru
 logger = Logger().get_logger()
-
-# Konfigurace SSL - vypnutí varování pro self-signed certifikáty
-urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
 def check_internet():
     """
@@ -263,10 +259,8 @@ class MinerWidget(rumps.App):
                 workers_url = f"{BASE_URL}/accounts/workers/json/{COIN}/"
                 logger.info(f"Pokus {attempt + 1}/{MAX_RETRIES} o načtení dat")
                 
-                # Vytvoření session s vypnutou SSL verifikací
                 session = requests.Session()
-                session.verify = False
-                
+
                 # Načtení profilu
                 logger.debug(f"Načítám profil z: {profile_url}")
                 profile = session.get(profile_url, headers=HEADERS, timeout=10)
