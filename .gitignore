@@ -176,3 +176,10 @@ logs/
 # Temporary files
 *.tmp
 *.temp
+
+# Tooling caches
+.pytest_cache/
+.ruff_cache/
+uv.lock
+.venv/
+logs/

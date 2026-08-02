@@ -1,83 +1,90 @@
 #!/usr/bin/env python3
-import time
-import uuid
-import hmac
-import hashlib
-import requests
-import sys
+"""Reads the Tuya Cloud device the widget shows a temperature from.
+
+Run directly to print the raw status and the current reading, which is how a
+credential or device problem is diagnosed without the widget in the way.
+"""
+
 import os
+import sys
+
+import requests
 from dotenv import load_dotenv
 
-# Načtení .env proměnných
+from tuya import TuyaError, base_url, make_headers, read_temperature, unwrap
+
 load_dotenv()
 
-# ───── KONFIGURACE ─────
-ACCESS_ID     = os.getenv("TUYA_ACCESS_ID")
+ACCESS_ID = os.getenv("TUYA_ACCESS_ID")
 ACCESS_SECRET = os.getenv("TUYA_ACCESS_SECRET")
-REGION        = os.getenv("TUYA_REGION", "eu")
-DEVICE_ID     = os.getenv("TUYA_DEVICE_ID")
-# ────────────────────────
+REGION = os.getenv("TUYA_REGION", "eu")
+DEVICE_ID = os.getenv("TUYA_DEVICE_ID")
 
-# Validace povinných proměnných
-if not ACCESS_ID or not ACCESS_SECRET or not DEVICE_ID:
-    print("❌ Chyba: Chybí povinné Tuya API proměnné v .env souboru", file=sys.stderr)
-    print("Požadované proměnné: TUYA_ACCESS_ID, TUYA_ACCESS_SECRET, TUYA_DEVICE_ID", file=sys.stderr)
-    sys.exit(1)
+BASE_URL = base_url(REGION)
 
-BASE_URL = f"https://openapi.tuya{REGION}.com"
+# Seconds to wait on a Tuya call. The widget updates every few minutes, so a
+# stalled request must not hold its update thread.
+TIMEOUT = 15
 
-def make_headers(path: str, token: str = "") -> dict:
-    method = "GET"
-    ts     = str(int(time.time() * 1000))
-    nonce  = uuid.uuid4().hex
-    content_sha = hashlib.sha256(b"").hexdigest()
-    string_to_sign = "\n".join([method, content_sha, "", path])
-    base = ACCESS_ID + (token or "") + ts + nonce + string_to_sign
-    sign = hmac.new(ACCESS_SECRET.encode(), base.encode(), hashlib.sha256).hexdigest().upper()
 
-    hdr = {
-        "client_id":   ACCESS_ID,
-        "sign_method": "HMAC-SHA256",
-        "t":           ts,
-        "nonce":       nonce,
-        "sign":        sign
-    }
-    if token:
-        hdr["access_token"] = token
-    return hdr
+def require_credentials() -> None:
+    """Stop with a readable message when the account is not configured.
+
+    Called from the entry points rather than at import, so the widget can start
+    without Tuya set up and simply show no temperature.
+    """
+    missing = [
+        name
+        for name, value in (
+            ("TUYA_ACCESS_ID", ACCESS_ID),
+            ("TUYA_ACCESS_SECRET", ACCESS_SECRET),
+            ("TUYA_DEVICE_ID", DEVICE_ID),
+        )
+        if not value
+    ]
+    if missing:
+        raise TuyaError(f"Missing in .env: {', '.join(missing)}")
+
+
+def _headers(path: str, token: str = "") -> dict:
+    return make_headers(ACCESS_ID, ACCESS_SECRET, path, token)
+
 
 def get_access_token() -> str:
+    """Access token for the configured account. Raises TuyaError when refused."""
+    require_credentials()
     path = "/v1.0/token?grant_type=1"
-    r = requests.get(BASE_URL + path, headers=make_headers(path))
+    r = requests.get(BASE_URL + path, headers=_headers(path), timeout=TIMEOUT)
     r.raise_for_status()
-    data = r.json()
-    if not data.get("success", False):
-        print("❌ Token error:", data, file=sys.stderr); sys.exit(1)
-    return data["result"]["access_token"]
+    return unwrap(r.json(), "Token")["access_token"]
+
 
 def get_device_status(token: str):
+    """Status list for the configured device. Raises TuyaError when refused."""
     path = f"/v1.0/devices/{DEVICE_ID}/status"
-    r = requests.get(BASE_URL + path, headers=make_headers(path, token))
+    r = requests.get(BASE_URL + path, headers=_headers(path, token), timeout=TIMEOUT)
     r.raise_for_status()
-    data = r.json()
-    if not data.get("success", False):
-        print("❌ Status error:", data, file=sys.stderr); sys.exit(1)
-    return data["result"]
+    return unwrap(r.json(), "Status")
+
 
 def main():
-    token  = get_access_token()
-    status = get_device_status(token)
+    try:
+        token = get_access_token()
+        status = get_device_status(token)
+    except (TuyaError, requests.RequestException) as e:
+        print(f"Chyba: {e}", file=sys.stderr)
+        return 1
 
-    print("▶️ Full status JSON:")
+    print("Full status JSON:")
     print(status)
 
-    # najdeme přesně va_temperature a přepočítáme na °C
-    temp_item = next((d for d in status if d.get("code") == "va_temperature"), None)
-    if temp_item is not None:
-        temp_c = temp_item["value"] / 10.0
-        print(f"\n🌡️ Aktuální teplota: {temp_c:.1f} °C")
+    temperature = read_temperature(status)
+    if temperature is None:
+        print("\nPolozka va_temperature nenalezena.")
     else:
-        print("\n⚠️ Položka va_temperature nenalezena.")
+        print(f"\nAktualni teplota: {temperature:.1f} C")
+    return 0
+
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())
