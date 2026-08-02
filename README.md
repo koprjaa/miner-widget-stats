@@ -1,36 +1,33 @@
 # miner-widget-stats
 
-**macOS menu-bar widget that shows live Bitcoin hashrate from pool.braiins.com and ambient temperature from a Tuya sensor, side-by-side.**
+macOS menu bar widget that shows the live Bitcoin hashrate from pool.braiins.com next to the ambient temperature from a Tuya sensor.
 
 ![python](https://img.shields.io/badge/python-3.10+-3776AB?style=flat-square&logo=python&logoColor=white)
 ![license](https://img.shields.io/badge/license-MIT-A31F34?style=flat-square)
 ![status](https://img.shields.io/badge/status-active-22863A?style=flat-square)
 ![platform](https://img.shields.io/badge/platform-macOS-000?style=flat-square&logo=apple&logoColor=white)
-![rumps](https://img.shields.io/badge/rumps-menu%20bar-555?style=flat-square)
 
-One glance at the top-right of the screen tells you whether the miner is happy and whether the mining shed is getting too hot.
+One glance at the menu bar tells you whether the miner runs and whether the room gets too hot.
 
 ```
-  ▲ WiFi   🔊    12.5TH/s 45.2°C    🔋   Mon 16:02
-                └──── miner-widget-stats
+  WiFi   Vol    12.5TH/s 45.2°C    Battery   Mon 16:02
+                |
+                miner-widget-stats
 ```
 
-Updates every 5 minutes. Backed by a persistent tray process via [rumps](https://github.com/jaredks/rumps), with Tuya Cloud API for the thermometer and pool.braiins.com's account API for the hashrate.
+The widget updates every 5 minutes. It runs as a persistent tray process with [rumps](https://github.com/jaredks/rumps). It reads the temperature from the Tuya Cloud API and the hashrate from the account API of pool.braiins.com.
 
-## Install + run
+## Install
 
 ```bash
 python -m venv .venv
 source .venv/bin/activate
 pip install -r requirements.txt
-python miner_widget.py
 ```
 
-For autostart on login, symlink the included `com.miner.widget.plist` into `~/Library/LaunchAgents/` and `launchctl load` it.
+## Configure
 
-## Config
-
-Create `.env` in the repo root:
+Create a `.env` file in the repository root:
 
 ```ini
 # Braiins Pool
@@ -48,18 +45,31 @@ TUYA_REGION=eu
 TUYA_DEVICE_ID=your_device_id
 ```
 
-- Braiins token from [pool.braiins.com → Access Profile → API Tokens](https://pool.braiins.com/)
-- Tuya credentials from [iot.tuya.com](https://iot.tuya.com/) after linking your sensor via the Tuya Smart / Smart Life app
+Get the Braiins token from pool.braiins.com under Access Profile, then API Tokens. Get the Tuya credentials from [iot.tuya.com](https://iot.tuya.com/) after you link the sensor in the Tuya Smart or Smart Life app.
 
-## What's where
+## Use
 
-- `miner_widget.py` — rumps tray app, update loop, formatting
-- `get_api.py` — Tuya Cloud HMAC-signed API (access token + device status)
-- `com.miner.widget.plist` — LaunchAgent template for autostart
+```bash
+python miner_widget.py
+```
 
-## Why rumps instead of a web dashboard
+For autostart, link `com.miner.widget.plist` into `~/Library/LaunchAgents/` and load it with `launchctl`.
 
-A mining shed upstairs doesn't need Grafana. It needs one number on-screen at all times with zero friction. A menu-bar widget is always visible, costs nothing when nothing changes, and doesn't occupy a browser tab.
+## How it works
+
+```
+miner_widget.py         rumps tray app, update loop, number formatting
+get_api.py              Tuya Cloud API with HMAC signing, access token and device status
+com.miner.widget.plist  LaunchAgent template for autostart
+```
+
+A mining shed does not need Grafana. It needs one number on screen at all times. A menu bar widget stays visible, costs nothing when nothing changes, and takes no browser tab.
+
+## Limits
+
+- macOS only. rumps wraps the AppKit status bar.
+- Both the pool token and the Tuya credentials are required. The widget shows nothing without them.
+- No tests.
 
 ## License
 
