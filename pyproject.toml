@@ -18,7 +18,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Topic :: System :: Monitoring",
 ]
-dependencies = ["requests>=2.32", "python-dotenv>=1.0", "rumps>=0.4; sys_platform == 'darwin'"]
+dependencies = ["requests>=2.33.0", "python-dotenv>=1.2.2", "rumps>=0.4; sys_platform == 'darwin'"]
 
 [project.optional-dependencies]
 dev = ["pytest>=8.0", "ruff==0.16.1"]
