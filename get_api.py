@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+#
+# Project: miner-widget-stats
+# File:    get_api.py
+#
+# Description:
+# Command line probe that reads the Tuya Cloud device the widget takes its temperature from.
+#
+# Author:
+# Jan Alexandr Kopřiva
+# jan.alexandr.kopriva@gmail.com
+#
+# License: MIT
+#
+
 """Reads the Tuya Cloud device the widget shows a temperature from.
 
 Run directly to print the raw status and the current reading, which is how a

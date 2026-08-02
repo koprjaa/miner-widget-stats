@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+#
+# Project: miner-widget-stats
+# File:    hashrate.py
+#
+# Description:
+# Turns a pool hash rate and a temperature reading into the text shown on the menu bar.
+#
+# Author:
+# Jan Alexandr Kopřiva
+# jan.alexandr.kopriva@gmail.com
+#
+# License: MIT
+#
+
 """Turning a pool hash rate reading into the text on the menu bar."""
 
 # Multipliers onto TH/s, which is the unit the widget prefers to show.

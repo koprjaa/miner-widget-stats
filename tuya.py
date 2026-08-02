@@ -1,4 +1,18 @@
 #!/usr/bin/env python3
+#
+# Project: miner-widget-stats
+# File:    tuya.py
+#
+# Description:
+# Signs Tuya Cloud requests and reads a temperature from a device.
+#
+# Author:
+# Jan Alexandr Kopřiva
+# jan.alexandr.kopriva@gmail.com
+#
+# License: MIT
+#
+
 """Signing and reading a Tuya Cloud device.
 
 The request signature and the unit conversion are pure functions, so they can be

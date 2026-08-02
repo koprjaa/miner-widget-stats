@@ -1,3 +1,17 @@
+#
+# Project: miner-widget-stats
+# File:    test_widget.py
+#
+# Description:
+# Tests for the Tuya request signing and the value formatting. No account, no pool, no menu bar.
+#
+# Author:
+# Jan Alexandr Kopřiva
+# jan.alexandr.kopriva@gmail.com
+#
+# License: MIT
+#
+
 """Tests for the widget logic. No Tuya account, no pool, no menu bar.
 
 get_api.py imports requests and dotenv and reads the environment, so it is left
