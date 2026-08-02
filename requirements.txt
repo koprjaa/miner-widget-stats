@@ -1,3 +1,5 @@
-rumps; sys_platform == "darwin"
-requests
-python-dotenv
+requests>=2.32.4
+python-dotenv>=1.0
+
+# macOS menu bar. Not installable elsewhere, which is why the tests avoid it.
+rumps>=0.4; sys_platform == "darwin"
